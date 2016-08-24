@@ -6,22 +6,31 @@ function stringout = num2sepstr(numin,format)
 %   seperators. See <a href="matlab:help num2str">num2str</a> for behavior
 %   when format is omitted.
 % 
-%   When a string length is specified, the result may be longer than the
-%   request by the number of thousands separators. Instead of...
-%   >> sprintf('%s\n',num2sepstr(1e6,'%10.2f'))
+%   String length is ignored; Instead of...
+%   >> sprintf('%s\n',num2sepstr(1e6,'% 20.2f'))
 %   ...try...
-%   >> sprintf('%10s\n',num2sepstr(1e6,'%.2f'))
+%   >> sprintf('% 20s\n',num2sepstr(1e6,'%.2f'))
 % 
 % See also SPRINTF, NUM2STR
 % 
 % Created by:
 %   Robert Perrotta
 
+% Simplifies call structure later
 if nargin < 2
-    str = num2str(numin);
+    format = {};
 else
-    str = num2str(numin,format);
+    format = {format};
 end
+
+if ~isreal(numin)
+    stringout = sprintf('%s+%si',...
+        num2sepstr(real(numin),format{:}),...
+        num2sepstr(imag(numin),format{:}));
+    return
+end
+
+str = num2str(numin,format{:});
 
 if isempty(str)
     error('num2sepstr:num2str:invalidFormat','Invalid format.')
