@@ -45,3 +45,4 @@ str = strrep(str(:)',char(0),'');
 stringout = [splt{1},str,splt{2}];
 
 end
+ 
