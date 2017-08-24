@@ -1,20 +1,25 @@
-function out = num2sepstr(numin,format,sep)
-% NUM2SEPSTR Convert to string with comma separation at thousands.
+function out = num2sepstr(numin, format, sep)
+% NUM2SEPSTR Convert to string with separation at thousands.
 %
-% out = NUM2SEPSTR(numin,[format]) formats numin to a string
-%   according to the specified format ('%f' by default) and adds thousands
-%   seperators (commas by default).
+% out = NUM2SEPSTR(numin,[format],[sep]) formats numin to a string
+%   according to the specified format ('%f' by default) and adds the
+%   sepcified thousands seperators (commas by default).
 %
 % For non-scalar numin, num2sepstr outpts a cell array of the same shape
-%   as numin where numin is called with the optional format on each value
-%   in the n-D array, numin.
+%   as numin where num2sepstr is called on each value in numin.
 %
 % String length from format, when specified, is applied before commas are
 %   added; Instead of...
 %
-%   >> num2sepstr(1e6,'% 20.2f')
-%   ...try...
-%   >> sprintf('% 20s\n',num2sepstr(1e6,'%.2f'))
+%   >> num2sepstr(1e6,'% 20.2f') % length = 22
+%   ans =
+%       '          1,000,000.00'
+% 
+% ...try...
+% 
+%   >> sprintf('% 20s',num2sepstr(1e6,'%.2f')) % length = 20
+%   ans =
+%       '        1,000,000.00'
 %
 % See also SPRINTF, NUM2STR
 %
@@ -35,45 +40,55 @@ end
 if numel(numin)>1
     out = cell(size(numin));
     for ii = 1:numel(numin)
-        out{ii} = num2sepstr(numin(ii),format,sep);
+        out{ii} = num2sepstr(numin(ii), format, sep);
     end
     return
 end
 
 if ~isreal(numin)
-    out = sprintf('%s+%si',...
-        num2sepstr(real(numin),format,sep),...
-        num2sepstr(imag(numin),format,sep));
+    out = sprintf('%s+%si', ...
+        num2sepstr(real(numin), format, sep), ...
+        num2sepstr(imag(numin), format, sep));
     return
 end
 
-if isempty(format)
-    autoformat = true;
-    if ~isinteger(numin) && mod(round(numin,4),1)
-        format = '%.4f'; % 4 digits is the num2str default
-    else
+autoformat = isempty(format);
+if autoformat
+    if isinteger(numin) || mod(round(numin, 4), 1) == 0
         format = '%.0f';
+    else
+        format = '%.4f'; % 4 digits is the num2str default
     end
-else
-    autoformat = false;
 end
 
-str = sprintf(format,numin);
+str = sprintf(format, numin);
 
 if isempty(str)
-    error('num2sepstr:num2str:invalidFormat','Invalid format.')
+    error('num2sepstr:invalidFormat', ...
+        'Invalid format (sprintf could not use "%s").', format)
 end
 
-out = regexpi(str,'^(\D*\d{0,3})(\d{3})*(\D\d*)?$','tokens','once');
+out = regexpi(str, '^(\D*\d{0,3})(\d{3})*(\D\d*)?$', 'tokens', 'once');
 if numel(out)
-    out = [out{1},regexprep(out{2},'(\d{3})',[sep,'$1']),out{3}];
+    nn = 1:length(out{2});
+    % slide digits over to make room for separators
+    out{2}(nn + ceil(nn/3)) = out{2};
+    % insert separators
+    out{2}(1:4:end) = sep;
+    out = [out{:}];
+    % regexprep implementation is about as fast as the above, but less
+    % readable in my opinion.
+    % out = [out{1}, regexprep(out{2}, '(\d{3})', [sep,'$1']), out{3}];
 else
     out = str;
 end
 
 if autoformat
-    % trim trailing zeros after the decimal
-    out = regexprep(out,'(\.\d*[1-9])(0*)','$1');
+    % Trim trailing zeros after the decimal. (By checking above for numbers
+    % that look like integers using autoformat, we avoid ever having ONLY
+    % zeros after the decimal. There will always be at least one nonzero
+    % digit following the decimal.)
+    out = regexprep(out, '(\.\d*[1-9])(0*)', '$1');
 end
 
 end
