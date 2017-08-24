@@ -46,6 +46,8 @@ function testTrimZeros(testCase)
 verifyEqual(testCase,num2sepstr(1),'1')
 verifyEqual(testCase,num2sepstr(1234),'1,234')
 verifyEqual(testCase,num2sepstr(1234.00001),'1,234')
+verifyEqual(testCase,num2sepstr(1234.0100),'1,234.01')
+verifyEqual(testCase,num2sepstr(1234.01001),'1,234.01')
 end
 function testFormatSpecfiers(testCase)
 verifyEqual(testCase,num2sepstr(1234.6,'%.4f'),'1,234.6000')
