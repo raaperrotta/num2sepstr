@@ -23,6 +23,12 @@ verifyEqual(testCase,num2sepstr(1234.5,'%.2f'),'1,234.50')
 verifyEqual(testCase,num2sepstr(1234.5,'%.4f'),'1,234.5000')
 verifyEqual(testCase,num2sepstr(123456789.5,'%.0f'),'123,456,790')
 end
+function testSep(testCase)
+verifyEqual(testCase,num2sepstr(1234.5,'%f',':'),'1:234.500000')
+verifyEqual(testCase,num2sepstr(1234.5,'%.2f','#'),'1#234.50')
+verifyEqual(testCase,num2sepstr(1234.5,'%.4f','separator!'),'1separator!234.5000')
+verifyEqual(testCase,num2sepstr(123456789.5,'%.0f','_'),'123_456_790')
+end
 function testZero(testCase)
 verifyEqual(testCase,num2sepstr(0),'0')
 end

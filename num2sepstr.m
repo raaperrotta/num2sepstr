@@ -70,15 +70,7 @@ end
 
 out = regexpi(str, '^(\D*\d{0,3})(\d{3})*(\D\d*)?$', 'tokens', 'once');
 if numel(out)
-    nn = 1:length(out{2});
-    % slide digits over to make room for separators
-    out{2}(nn + ceil(nn/3)) = out{2};
-    % insert separators
-    out{2}(1:4:end) = sep;
-    out = [out{:}];
-    % regexprep implementation is about as fast as the above, but less
-    % readable in my opinion.
-    % out = [out{1}, regexprep(out{2}, '(\d{3})', [sep,'$1']), out{3}];
+    out = [out{1}, regexprep(out{2}, '(\d{3})', [sep,'$1']), out{3}];
 else
     out = str;
 end
